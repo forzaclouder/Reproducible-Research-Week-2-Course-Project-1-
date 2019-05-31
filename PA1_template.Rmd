@@ -1,0 +1,176 @@
+---
+title: "PA1_template.Rmd"
+author: "Yunke Li"
+date: "5/31/2019"
+output: html_document
+---
+
+#Load package
+```{r}
+library(ggplot2)
+library(scales)
+library(dplyr)
+library(tidyr)
+library(magrittr)
+```
+
+#Reading dataset and/or processing the data
+```{r}
+data<-download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile="data.zip")
+data<-read.csv(unzip("data.zip"))
+data<-data %>% 
+        mutate(steps=as.integer(steps),
+        interval=as.integer(interval),
+        date=as.Date(date, format("%Y-%m-%d"))
+         )
+```
+
+#Question 1
+```{r}
+answer11<-data %>%
+        group_by(date) %>%
+        summarise(steps=sum(steps))
+
+answer12<-ggplot(answer11,aes(x=steps))+
+        geom_histogram(fill="green", color="black", binwidth=1500)+
+        ylab("Counts")+
+        xlab("The Total Number of Steps Taken Each Day")
+
+answer13.1<-mean(answer11$steps, na.rm=T)
+answer13.2<-median(answer11$steps, na.rm=T)
+```
+
+#Question 2
+```{r}
+q2data<-data %>%
+        filter(!is.na(steps)) %>%
+        group_by(interval) %>%
+        summarise(steps=mean(steps))
+
+answer21<-ggplot(q2data,aes(x=interval, y=steps))+
+        geom_line(color="darkgreen")+
+        ylab("Average Number of Steps")+
+        xlab("5-minute Interval")
+
+answer22<-filter(q2data,steps==max(q2data$steps))
+```
+
+#Question 3
+```{r}
+answer31<-sum(!complete.cases(data))
+
+fillingdata<-data %>%
+        filter(!is.na(steps)) %>%
+        group_by(interval) %>%
+        summarise(steps=mean(steps))
+missingdata<-filter(data,is.na(steps))
+
+for(i in 1:nrow(missingdata)){
+        missingdata$steps[i]<-fillingdata$steps[
+        missingdata$interval[i]==fillingdata$interval
+        ]
+}
+
+answer33<-rbind(missingdata,filter(data,!is.na(steps)))
+
+q34data<-answer33%>%
+        group_by(date) %>%
+        summarise(steps=sum(steps))
+
+answer34.1<-ggplot(q34data,aes(x=steps))+
+        geom_histogram(fill="blue", color="black", binwidth=1500)+
+        ylab("Counts")+
+        xlab("The Total Number of Steps Taken Each Day")
+answer34.2<-mean(q34data$steps, na.rm=T)
+answer34.3<-median(q34data$steps, na.rm=T)
+```
+
+#Question 4
+```{r}
+fillingdata<-data %>%
+        filter(!is.na(steps)) %>%
+        group_by(interval) %>%
+        summarise(steps=mean(steps))
+missingdata<-filter(data,is.na(steps))
+for(i in 1:nrow(missingdata)){
+        missingdata$steps[i]<-fillingdata$steps[
+        missingdata$interval[i]==fillingdata$interval
+        ]
+}
+q4data<-rbind(missingdata,filter(data,!is.na(steps)))
+answer41<-q4data %>%
+        mutate(weekday=ifelse(weekdays(q4data$date)=="Saturday"|weekdays(q4data$date)=="Sunday", "weekend", "weekday"))
+
+q4data<-answer41 %>%
+        group_by(weekday,interval) %>%
+        summarise(steps=mean(steps,na.rm=T))
+
+answer42<-ggplot(q4data,aes(x=interval, y=steps))+
+        geom_line(color="navy")+
+        facet_wrap(~weekday, nrow=2, ncol=1)+
+        ylab("Average Number of Steps") + 
+        xlab("5-minute Interval")
+```
+
+#Answer output
+#Code for reading in the dataset and/or processing the data
+```{r,eval=FALSE}
+data<-download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile="data.zip")
+data<-read.csv(unzip("data.zip"))
+data<-data %>% 
+        mutate(steps=as.integer(steps),
+        interval=as.integer(interval),
+        date=as.Date(date, format("%Y-%m-%d"))
+         )
+```
+
+#Histogram of the total number of steps taken each day
+```{r,echo=FALSE}
+print(answer12)
+```
+
+#Mean and median number of steps taken each day
+```{r,echo=FALSE}
+print(answer13.1)
+print(answer13.2)
+```
+
+#Time series plot of the average number of steps taken
+```{r,echo=FALSE}
+print(answer21)
+```
+
+#The 5-minute interval that, on average, contains the maximum number of steps
+```{r,echo=FALSE}
+print(answer22)
+```
+
+#Code to describe and show a strategy for imputing missing data
+```{r,eval=FALSE}
+fillingdata<-data %>%
+        filter(!is.na(steps)) %>%
+        group_by(interval) %>%
+        summarise(steps=mean(steps))
+missingdata<-filter(data,is.na(steps))
+
+for(i in 1:nrow(missingdata)){
+        missingdata$steps[i]<-fillingdata$steps[
+        missingdata$interval[i]==fillingdata$interval
+        ]
+}
+
+answer33<-rbind(missingdata,filter(data,!is.na(steps)))
+```
+
+#Histogram of the total number of steps taken each day after missing values are imputed
+```{r,echo=FALSE}
+print(answer34.1)
+```
+
+#Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+```{r,echo=FALSE}
+answer42
+```
+
+#All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
+This is it!
