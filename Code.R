@@ -5,11 +5,9 @@ library(dplyr)
 library(tidyr)
 library(magrittr)
 
-#Data download
+#Code for reading in the dataset and/or processing the data
 data<-download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile="data.zip")
 data<-read.csv(unzip("data.zip"))
-
-#Data reclassicifation
 data<-data %>% 
         mutate(steps=as.integer(steps),
         interval=as.integer(interval),
@@ -30,14 +28,6 @@ answer12<-ggplot(answer11,aes(x=steps))+
 answer13.1<-mean(answer11$steps, na.rm=T)
 answer13.2<-median(answer11$steps, na.rm=T)
 
-print(answer11)
-png(filename = "1.2.png")
-answer12
-dev.off
-print(answer13.1)
-print(answer13.2)
-
-
 #Question 2
 q2data<-data %>%
         filter(!is.na(steps)) %>%
@@ -51,15 +41,10 @@ answer21<-ggplot(q2data,aes(x=interval, y=steps))+
 
 answer22<-filter(q2data,steps==max(q2data$steps))
 
-png(filename = "2.1.png")
-answer21
-dev.off
-print(answer22)
-
 
 #Question 3
 answer31<-sum(!complete.cases(data))
-
+#Code to describe and show a strategy for imputing missing data
 fillingdata<-data %>%
         filter(!is.na(steps)) %>%
         group_by(interval) %>%
@@ -84,13 +69,6 @@ answer34.1<-ggplot(q34data,aes(x=steps))+
         xlab("The Total Number of Steps Taken Each Day")
 answer34.2<-mean(q34data$steps, na.rm=T)
 answer34.3<-median(q34data$steps, na.rm=T)
-
-print(answer31)
-png(filename = "3.4.1.png")
-answer34.1
-dev.off
-print(answer34.2)
-print(answer34.3)
 
 
 #Question 4
@@ -118,7 +96,41 @@ answer42<-ggplot(q4data,aes(x=interval, y=steps))+
         ylab("Average Number of Steps") + 
         xlab("5-minute Interval")
 
-print(answer41)
+
+#Answer output
+
+#Code for reading in the dataset and/or processing the data
+#See above
+
+#Histogram of the total number of steps taken each day
+png(filename = "1.2.png")
+answer12
+dev.off
+
+#Mean and median number of steps taken each day
+print(answer13.1)
+print(answer13.2)
+
+#Time series plot of the average number of steps taken
+png(filename = "2.1.png")
+answer21
+dev.off
+
+#The 5-minute interval that, on average, contains the maximum number of steps
+print(answer22)
+
+#Code to describe and show a strategy for imputing missing data
+#See above
+
+#Histogram of the total number of steps taken each day after missing values are imputed
+png(filename = "3.4.1.png")
+answer34.1
+dev.off
+
+#Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
 png(filename = "4.2.png")
 answer42
 dev.off
+
+#All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
+#This is it!
